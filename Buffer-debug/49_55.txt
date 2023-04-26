@@ -1,0 +1,214 @@
+49 -> 55
+field(add[55]):field(1; "Group ID"; Text[1000]), field(40; "Journal Templ. Name"; Code[10])
+field(delete[49]):field(28110; "Line No."; Integer), field(28111; "Posting Description"; Text[100])
+field(change):1 -> 2, 2 -> 3
+field(same):[4~8, 10~14, 17~26, 29, 31, 32, 35, 215, 480, 1000, 1700, 1701, 5600, 5601~5603, 5605, 5606, 5609~5614, 11624~11626,
+	     28040, 28041, 28081~28085,]
+-------------------------------------------------------------------------------------------------------
+keys
+key(Key1; "Line No.", Type, "G/L Account", "Gen. Bus. Posting Group", "Gen. Prod. Posting Group", "VAT Bus. Posting Group", "VAT Prod. Posting Group", "Tax Area Code", "Tax Group Code", "Tax Liable", "Use Tax", "Dimension Set ID", "Job No.", "Fixed Asset Line No.", "Deferral Code", "Additional Grouping Identifier")
+        ▼
+key(key1; "Group ID")
+-------------------------------------------------------------------------------------------------------
+var
+TempInvoicePostBufferRounding: Record "Invoice Post. Buffer" temporary;
+                             ▼
+TempInvoicePostBufferRounding: Record "Invoice Posting Buffer" temporary;
+--------------------------------------------------------------------------------------------------------
+procedure PrepareSales(var SalesLine: Record "Sales Line")
+add(55): "Journal Templ. Name" := SalesLine.GetJnlTemplateName(); Ln385
+change: OnAfterInvPostBufferPrepareSales(SalesLine, Rec) -> OnAfterPrepareSales(SalesLine, Rec) L387
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+procedure CalcDiscount(PricesInclVAT: Boolean; DiscountAmount: Decimal; DiscountAmountACY: Decimal)
+local procedure CalcVATAmount(ValueInclVAT: Boolean; Value: Decimal; VATPercent: Decimal): Decimal
+procedure SetAccount(AccountNo: Code[20]; var TotalVAT: Decimal; var TotalVATACY: Decimal; var TotalAmount: Decimal; var TotalAmountACY: Decimal)
+procedure SetAmounts(TotalVAT: Decimal; TotalVATACY: Decimal; TotalAmount: Decimal; TotalAmountACY: Decimal; VATDifference: Decimal; TotalVATBase: Decimal; TotalVATBaseACY: Decimal)
+無變動
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+procedure PreparePurchase(var PurchLine: Record "Purchase Line")
+add(55):"WHT Business Posting Group" := PurchLine."WHT Business Posting Group"; Ln485
+        "WHT Product Posting Group" := PurchLine."WHT Product Posting Group"; Ln486
+        "VAT Difference" := PurchLine."VAT Difference"; Ln487
+	"Journal Templ. Name" := PurchLine.GetJnlTemplateName(); Ln517
+change:OnAfterInvPostBufferPreparePurchase(PurchLine, Rec) -> OnAfterPreparePurchase(PurchLine, Rec) Ln519
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+procedure CalcDiscountNoVAT(DiscountAmount: Decimal; DiscountAmountACY: Decimal)
+procedure SetSalesTaxForPurchLine(PurchaseLine: Record "Purchase Line")
+procedure ReverseAmounts()
+無變動
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+procedure SetAmountsNoVAT(TotalAmount: Decimal; TotalAmountACY: Decimal; VATDifference: Decimal)
+delete(55):OnAfterSetAmountsNoVAT(Rec, TotalAmount, TotalAmountACY, VATDifference)  Ln585[49]
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+procedure PrepareService(var ServiceLine: Record "Service Line")
+change:OnAfterInvPostBufferPrepareService(ServiceLine, Rec) -> OnAfterPrepareService(ServiceLine, Rec)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[Scope('OnPrem')]
+無變動
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+procedure FillPrepmtAdjBuffer(var TempInvoicePostBuffer: Record "Invoice Post. Buffer" temporary; InvoicePostBuffer: Record "Invoice Post. Buffer"; GLAccountNo: Code[20]; AdjAmount: Decimal; RoundingEntry: Boolean)
+55已移除
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+procedure PreparePrepmtAdjBuffer(InvoicePostBuffer: Record "Invoice Post. Buffer"; GLAccountNo: Code[20]; AdjAmount: Decimal; RoundingEntry: Boolean)
+      ▼
+procedure PreparePrepmtAdjBuffer(InvoicePostingBuffer: Record "Invoice Posting Buffer"; GLAccountNo: Code[20]; AdjAmount: Decimal; RoundingEntry: Boolean)
+
+change: PrepmtAdjInvoicePostBuffer/InvoicePostBuffer 全部替換成 PrepmtAdjInvoicePostingBuffer/InvoicePostingBuffer
+	PrepmtAdjInvoicePostBuffer: Record "Invoice Post. Buffer" -> PrepmtAdjInvoicePostingBuffer: Record "Invoice Posting Buffer"
+	OnFillPrepmtAdjBufferOnBeforeAssignInvoicePostBuffer(PrepmtAdjInvoicePostBuffer, InvoicePostBuffer) -> OnFillPrepmtAdjBufferOnBeforeAssignInvoicePostingBuffer(PrepmtAdjInvoicePostingBuffer, InvoicePostingBuffer)
+	InvoicePostBuffer := PrepmtAdjInvoicePostBuffer -> InvoicePostingBuffer := PrepmtAdjInvoicePostingBuffer
+	Ln647,649,650,653(InvoicePostBuffer -> InvoicePostingBuffer)
+add(55): PrepmtAdjInvoicePostingBuffer."Journal Templ. Name" := InvoicePostingBuffer."Journal Templ. Name"  Ln640
+	 InvoicePostingBuffer.BuildPrimaryKey();  Ln645
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+procedure Update(InvoicePostBuffer: Record "Invoice Post. Buffer") -> procedure Update(InvoicePostingBuffer: Record "Invoice Posting Buffer")
+change:Update(InvoicePostBuffer, InvDefLineNo, DeferralLineNo) -> Update(InvoicePostingBuffer, InvDefLineNo, DeferralLineNo)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+procedure Update(InvoicePostBuffer: Record "Invoice Post. Buffer"; var InvDefLineNo: Integer; var DeferralLineNo: Integer)
+	 ▼
+procedure Update(InvoicePostingBuffer: Record "Invoice Posting Buffer"; var InvDefLineNo: Integer; var DeferralLineNo: Integer)
+add(55): InvoicePostingBuffer.BuildPrimaryKey();
+change: OnBeforeInvPostBufferUpdate(Rec, InvoicePostBuffer) -> OnBeforeUpdate(Rec, InvoicePostingBuffer);
+	InvoicePostBuffer 全部替換成 InvoicePostingBuffer Ln674~687
+	OnBeforeInvPostBufferModify(Rec, InvoicePostBuffer) -> OnUpdateOnBeforeModify(Rec, InvoicePostingBuffer)
+	OnAfterInvPostBufferModify(Rec, InvoicePostBuffer) -> OnUpdateOnAfterModify(Rec, InvoicePostingBuffer);
+	OnAfterInvPostBufferUpdate(Rec, InvoicePostBuffer) -> OnAfterUpdate(Rec, InvoicePostingBuffer)
+====================================================================================================================
+add procedure(55): BuildPrimaryKey(), PadField(TextField: Text; MaxLength: Integer): Text    Ln707~744
+====================================================================================================================
+procedure UpdateVATBase(var TotalVATBase: Decimal; var TotalVATBaseACY: Decimal)
+local procedure UpdateEntryDescriptionFromPurchaseLine(PurchaseLine: Record "Purchase Line")
+local procedure UpdateEntryDescriptionFromSalesLine(SalesLine: Record "Sales Line")
+local procedure UpdateEntryDescriptionFromServiceLine(ServiceLine: Record "Service Line")
+local procedure UpdateEntryDescription(CopyLineDescrToGLEntry: Boolean; LineNo: Integer; LineDescription: text[100]; HeaderDescription: Text[100]; IsService: Boolean)
+local procedure AdjustRoundingForUpdate()
+local procedure AdjustRoundingFieldsPair(var TotalRoundingAmount: Decimal; var AmountLCY: Decimal; AmountFCY: Decimal)
+internal procedure ApplyRoundingForFinalPosting()
+local procedure ApplyRoundingValueForFinalPosting(var Rounding: Decimal; var Value: Decimal)
+無變動
+=============================================================================================
+add procedure(55): ClearVATFields()   Ln835~843
+=============================================================================================
+procedure CopyToGenJnlLine(var GenJnlLine: Record "Gen. Journal Line")
+procedure CopyToGenJnlLineFA(var GenJnlLine: Record "Gen. Journal Line")
+無變動
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+╬╬╬╬╬╬╬╬╬╬╬╬╬不一定正確，以下皆為推測╬╬╬╬╬╬╬╬╬╬╬╬╬
+local procedure OnAfterInvPostBufferPrepareSales(var SalesLine: Record "Sales Line"; var InvoicePostBuffer: Record "Invoice Post. Buffer")
+      ▼
+local procedure OnAfterPrepareSales(var SalesLine: Record "Sales Line"; var InvoicePostingBuffer: Record "Invoice Posting Buffer")
+~~~~~~~~~~~~~~~~
+local procedure OnAfterInvPostBufferPreparePurchase(var PurchaseLine: Record "Purchase Line"; var InvoicePostBuffer: Record "Invoice Post. Buffer")
+      ▼
+local procedure OnAfterPreparePurchase(var PurchaseLine: Record "Purchase Line"; var InvoicePostingBuffer: Record "Invoice Posting Buffer")
+~~~~~~~~~~~~~~~~
+local procedure OnAfterInvPostBufferPrepareService(var ServiceLine: Record "Service Line"; var InvoicePostBuffer: Record "Invoice Post. Buffer")
+      ▼
+local procedure OnAfterPrepareService(var ServiceLine: Record "Service Line"; var InvoicePostingBuffer: Record "Invoice Posting Buffer")
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+add(55):local procedure OnAfterBuildPrimaryKey(var InvoicePostingBuffer: Record "Invoice Posting Buffer") Ln914~916
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+local procedure OnAfterInvPostBufferModify(var InvoicePostBuffer: Record "Invoice Post. Buffer"; FromInvoicePostBuffer: Record "Invoice Post. Buffer")
+      ▼
+local procedure OnUpdateOnAfterModify(var InvoicePostingBuffer: Record "Invoice Posting Buffer"; FromInvoicePostingBuffer: Record "Invoice Posting Buffer")
+~~~~~~~~~~~~~~~~
+local procedure OnAfterInvPostBufferUpdate(var InvoicePostBuffer: Record "Invoice Post. Buffer"; var FromInvoicePostBuffer: Record "Invoice Post. Buffer")
+      ▼
+local procedure OnAfterUpdate(var InvoicePostingBuffer: Record "Invoice Posting Buffer"; var FromInvoicePostingBuffer: Record "Invoice Posting Buffer")
+~~~~~~~~~~~~~~~~
+delete(49): local procedure OnAfterSetAmountsNoVAT(var InvoicePostBuffer: Record "Invoice Post. Buffer"; TotalAmount: Decimal; TotalAmountACY: Decimal; VATDifference: Decimal)
+~~~~~~~~~~~~~~~~
+local procedure OnBeforeCalcDiscount(var InvoicePostBuffer: Record "Invoice Post. Buffer"; var IsHandled: Boolean)
+      ▼
+local procedure OnBeforeCalcDiscount(var InvoicePostingBuffer: Record "Invoice Posting Buffer"; var IsHandled: Boolean)
+~~~~~~~~~~~~~~~~
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+★ 以下簡稱 X ★
+(var InvoicePostBuffer: Record "Invoice Post. Buffer"; var IsHandled: Boolean) ->(var InvoicePostingBuffer: Record "Invoice Posting Buffer"; var IsHandled: Boolean)
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+~~~~~~~~~~~~~~~~
+以下 local procedure 進行 X
+OnBeforeCalcDiscountNoVAT
+OnBeforeInvPostBufferUpdate -> OnBeforeUpdate
+OnBeforeInvPostBufferModify -> OnUpdateOnBeforeModify
+OnBeforePrepareSales
+~~~~~~~~~~~~~~~~
+local procedure OnFillPrepmtAdjBufferOnBeforeAssignInvoicePostBuffer(var PrepmtAdjInvPostBuffer: Record "Invoice Post. Buffer"; InvoicePostBuffer: Record "Invoice Post. Buffer")    
+      ▼
+local procedure OnFillPrepmtAdjBufferOnBeforeAssignInvoicePostingBuffer(var PrepmtAdjInvoicePostingBuffer: Record "Invoice Posting Buffer"; InvoicePostingBuffer: Record "Invoice Posting Buffer")
+~~~~~~~~~~~~~~~~
+local procedure OnAfterCopyToGenJnlLine(var GenJnlLine: Record "Gen. Journal Line"; InvoicePostBuffer: Record "Invoice Post. Buffer");
+      ▼
+local procedure OnAfterCopyToGenJnlLine(var GenJnlLine: Record "Gen. Journal Line"; InvoicePostingBuffer: Record "Invoice Posting Buffer");
+~~~~~~~~~~~~~~~~
+local procedure OnAfterCopyToGenJnlLineFA(var GenJnlLine: Record "Gen. Journal Line"; InvoicePostBuffer: Record "Invoice Post. Buffer");
+      ▼
+local procedure OnAfterCopyToGenJnlLineFA(var GenJnlLine: Record "Gen. Journal Line"; InvoicePostingBuffer: Record "Invoice Posting Buffer");
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
