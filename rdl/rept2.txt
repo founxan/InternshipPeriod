@@ -1,0 +1,70 @@
+Whse. Receipt Subform (5769, ListPart)     Warehouse Receipt Line (7317)
+
+Posted Whse. Receipt Subform (7331, ListPart)   Posted Whse. Receipt Line (7319)
+
+https://vld-nav.com/how-to-group-data
+
+===================================================================================
+Vendor No.
+Vendor Name
+
+項次  No.(已過帳收貨單號)  No.(PO No. ex.104001)   No.(line中商品)  Description(line)   VAT Prod. Posting Group   Direct Unit Cost Excl. VAT   Currency Code   Line Amount Excl. VAT                   
+
+							合計:  Currency Code	Total Excl. VAT (GBP)
+                                                        -------------------------------------------------------------------------------------------------
+					合計:	   VAT Prod. Posting Group (90, Code)
+                                        -----------------------------------------------------------------------------------------------------------------
+合計:  Vendor No.
+-------------------------------------------------------------------------------------------------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Line要用VAT CUR 分類(Group by VAT&Currency)Temporary record method
+
+procedure PurchaseLineTempRecordGroupMethod()
+var
+    PurchaseLine: Record "Purchase Line";
+    PurchaseLineResult: Record "Purchase Line" temporary;
+    GroupNo: Integer;
+begin
+    PurchaseLine.SetCurrentKey("Currency Code", "VAT Prod. Posting Group");
+    if PurchaseLine.FindSet() then
+      repeat
+        //Check if group is exist
+        TempPurchaseLineResult.SetRange("Currency Code", PurchaseLine."Currency Code");
+        TempPurchaseLineResult.SetRange("VAT Prod. Posting Group", PurchaseLine."VAT Prod. Posting Group");
+        if not TempPurchaseLineResult.FindFirst() then begin
+          //New group record initialization
+          GroupNo += 1;
+          TempPurchaseLineResult := PurchaseLine;
+          TempPurchaseLineResult.Insert();
+        end else begin
+          //Continuation of the group
+          //here you can update values for group, maybe sum some amounts, etc.
+          TempPurchaseLineResult.Modify();
+        end;
+      until PurchaseLine.Next() = 0;
+end;
+=================================================================================================================================
+
+項次/     =RowNumber("DataSet_Result")
+https://www.youtube.com/watch?v=xejzboZIVck
+
+------------------------------------------------------
+
+purchase invoice 中 line (purchase line) 的 "receipt No." 去篩 posted purchase receipt 中的 line (Purch. Rcpt. Line (121)) 的 "order No."
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

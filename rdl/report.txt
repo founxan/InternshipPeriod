@@ -1,0 +1,81 @@
+(Buy-from Vendor No.)   Pay-to Name             Document Datepa
+Pay to Contact
+Pay to Post Code                                Buy-from Vendor Name                                       
+paytoCounty  paytoCity  paytoAddress            PhoneNo_CompanyInformation
+PhoneNo_Vendor   FaxNo_Vendor                   FaxNo_CompanyInformation
+Purchaser Code
+
+Location Code                                          ="Total  "& sum(ReportItems!Value.value)
+
+shiptoCounty shiptoCity  shiptoAddress
+----------------------------------------------------
+line
+	
+No.  Description  comment(客製化)  Quantity  Direct_Unit_Cost   Line_Amount   Shortcut Dimension 1 Code    Promised Receipt Date                                
+
+
+----------------------------------------------------
+                                         
+      totalpages(expr)(="Page "+Cstr(Globals!PageNumber) +" of "+Cstr(Globals!TotalPages))  Total NTD Excl. VAT
+                                         
+                                         
+      total?                   Total NTD Excl. VAT
+==================================================================================================
+
+Dimension (收貨部門 Shortcut Dimension 1 Code)
+https://learn.microsoft.com/en-us/dynamics365/business-central/finance-dimensions
+
+在report bulider把時間隱藏
+https://learn.microsoft.com/en-us/sql/reporting-services/lesson-5-formatting-a-report-reporting-services?view=sql-server-ver16
+
+讓標頭(Purchase line ex.Purchaser No.)在第二頁也同樣顯示
+https://debug.to/1107/how-to-set-table-header-in-every-page-in-power-bi-report-builder
+
+捲動編頁報表時，讓標頭保持可見 (Report Builder)
+https://learn.microsoft.com/zh-tw/sql/reporting-services/report-design/keep-headers-visible-when-scrolling-through-a-report-report-builder-and-ssrs?view=sql-server-ver16
+
+頁總
+https://social.msdn.microsoft.com/Forums/sharepoint/en-US/71e287ef-1979-44fc-9f67-9f53f2aa8458/ssrs-expression-adding-totals-per-page?forum=sqlreportingservices
+
+page inspection	=> Ctrl+Alt+F1
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+                     company infor.Name
+no.(purchase order)                         today()
+vendor code(pay-to)   vendor name(pay-to)   line_amount/total
+統編  		      Payment Method Code   Promised Receipt Date
+[c o m m e n t        Dimension 2 code      Dimension 2 name  line_amount/total]先忽略
+-----------------------------------------------------------------------------------------------
+line
+	
+No.  Description  comment(客製化)   Global Dimension 2 Code    Global Dimension 2 description   Line_Amount/total  
+
+page 66 "Purch. Comment Sheet"
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
