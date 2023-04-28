@@ -22,5 +22,5 @@ git push origin(作業區的小名) master(分支)
 # text in gray
 @@ text in purple (and bold)@@
 
-@@[readme特殊指令]: https://github.com/othree/markdown-syntax-zhtw      "readme特殊指令"@@
+[readme特殊指令]: https://github.com/othree/markdown-syntax-zhtw      //"readme特殊指令"
 ```
